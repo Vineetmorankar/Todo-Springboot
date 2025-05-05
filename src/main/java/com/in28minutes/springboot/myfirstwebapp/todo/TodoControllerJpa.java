@@ -15,16 +15,17 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 import jakarta.validation.Valid;
 
-//@Controller
+@Controller
 @SessionAttributes("name")
-public class TodoController {
+public class TodoControllerJpa {
 
-	private TodoService todoService;
+//	private TodoService todoService;
+	private TodoRepository todoRepository;
 	
-	
-	public TodoController(TodoService todoService) {
+	public TodoControllerJpa(TodoService todoService, TodoRepository todoRepository) {
 		super();
-		this.todoService = todoService;
+//		this.todoService = todoService;
+		this.todoRepository = todoRepository;
 	}
 
 
@@ -33,7 +34,8 @@ public class TodoController {
 	public String ListAllTodos(ModelMap model)
 	{
 		String username = getLoggedInUser(model);
-		List<Todo> todos = todoService.findByUsername(username);
+//		List<Todo> todos = todoService.findByUsername(username);
+		List<Todo> todos = todoRepository.findByUsername(username);
 		model.addAttribute("todos", todos);
 		return "listtodos";
 	}
@@ -55,21 +57,25 @@ public class TodoController {
 			return "addtodo";
 		}
 		String username = getLoggedInUser(model);
-		todoService.addTodo(username, todo.getDescription(), todo.getTargetdate(), false);
+		todo.setUsername(username);
+		todoRepository.save(todo);
+//		todoService.addTodo(username, todo.getDescription(), todo.getTargetdate(), false);
 		return "redirect:list-todos";
 	}
 	
 	@RequestMapping(value="delete-todo")
 	public String goToAddTodo(@RequestParam int id)
 	{
-		todoService.deleteById(id);
+//		todoService.deleteById(id);
+		todoRepository.deleteById(id);
 		return "redirect:list-todos";
 	}
 	
 	@RequestMapping(value="update-todo", method = RequestMethod.GET)
 	public String goToUpdatetodo(@RequestParam int id, ModelMap model)
 	{
-		Todo todo = todoService.findById(id);
+//		Todo todo = todoService.findById(id);
+		Todo todo = todoRepository.findById(id).get();
 		model.addAttribute("todo", todo);
 		return "addtodo";
 	}
@@ -83,7 +89,8 @@ public class TodoController {
 		}
 		String username = getLoggedInUser(model);
 		todo.setUsername(username);
-		todoService.updateTodo(todo);
+//		todoService.updateTodo(todo);
+		todoRepository.save(todo);
 		return "redirect:list-todos";
 	}
 	
